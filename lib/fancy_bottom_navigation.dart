@@ -1,40 +1,48 @@
-library fancy_bottom_navigation;
+library sz_fancy_bottom_navigation;
 
-import 'package:fancy_bottom_navigation/internal/tab_item.dart';
-import 'package:fancy_bottom_navigation/paint/half_clipper.dart';
-import 'package:fancy_bottom_navigation/paint/half_painter.dart';
+import 'package:sz_fancy_bottom_navigation/internal/tab_item.dart';
+import 'package:sz_fancy_bottom_navigation/paint/half_clipper.dart';
+import 'package:sz_fancy_bottom_navigation/paint/half_painter.dart';
 import 'package:flutter/material.dart';
 
-const double CIRCLE_SIZE = 60;
-const double ARC_HEIGHT = 70;
+const double CIRCLE_SIZE = 48;
+const double ARC_HEIGHT = 62;
 const double ARC_WIDTH = 90;
-const double CIRCLE_OUTLINE = 10;
+const double CIRCLE_OUTLINE = 8;
 const double SHADOW_ALLOWANCE = 20;
-const double BAR_HEIGHT = 60;
+//const double BAR_HEIGHT = 60;
 
 class FancyBottomNavigation extends StatefulWidget {
   FancyBottomNavigation(
       {@required this.tabs,
-      @required this.onTabChangedListener,
+      this.onTabChangedListener,
       this.key,
       this.initialSelection = 0,
       this.circleColor,
       this.activeIconColor,
       this.inactiveIconColor,
       this.textColor,
-      this.barBackgroundColor})
-      : assert(onTabChangedListener != null),
+      this.gradient,
+      this.barBackgroundColor,
+      this.pageController,
+      this.barHeight = 60,
+      this.hidden = false})
+      : assert(onTabChangedListener != null || pageController != null),
         assert(tabs != null),
-        assert(tabs.length > 1 && tabs.length < 5);
+        assert(tabs.length > 1 && tabs.length < 6);
 
   final Function(int position) onTabChangedListener;
   final Color circleColor;
   final Color activeIconColor;
   final Color inactiveIconColor;
   final Color textColor;
+  final Gradient gradient;
   final Color barBackgroundColor;
   final List<TabData> tabs;
   final int initialSelection;
+  final PageController pageController;
+  final double barHeight;
+  final bool hidden;
 
   final Key key;
 
@@ -56,6 +64,9 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   Color inactiveIconColor;
   Color barBackgroundColor;
   Color textColor;
+  Gradient gradient;
+  Color shadowColor;
+  Function() _pageControllerListener;
 
   @override
   void didChangeDependencies() {
@@ -90,12 +101,23 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
             ? Colors.white
             : Theme.of(context).primaryColor
         : widget.inactiveIconColor;
+    gradient = widget.gradient;
+    shadowColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white54
+        : Colors.black12;
   }
 
   @override
   void initState() {
     super.initState();
     _setSelected(widget.tabs[widget.initialSelection].key);
+
+    // add listener for page swipes
+    if (this.widget.pageController != null) {
+      _pageControllerListener =
+          () => this.setPageOffset(this.widget.pageController.page);
+      this.widget.pageController.addListener(_pageControllerListener);
+    }
   }
 
   _setSelected(UniqueKey key) {
@@ -117,10 +139,9 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
       alignment: Alignment.bottomCenter,
       children: <Widget>[
         Container(
-          height: BAR_HEIGHT,
+          height: widget.hidden ? 0 : widget.barHeight,
           decoration: BoxDecoration(color: barBackgroundColor, boxShadow: [
-            BoxShadow(
-                color: Colors.black12, offset: Offset(0, -1), blurRadius: 8)
+            BoxShadow(color: shadowColor, offset: Offset(0, -4), blurRadius: 4)
           ]),
           child: Row(
             mainAxisSize: MainAxisSize.max,
@@ -132,26 +153,28 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                     iconData: t.iconData,
                     title: t.title,
                     iconColor: inactiveIconColor,
+                    gradient: this.gradient,
                     textColor: textColor,
                     callbackFunction: (uniqueKey) {
                       int selected = widget.tabs
                           .indexWhere((tabData) => tabData.key == uniqueKey);
-                      widget.onTabChangedListener(selected);
-                      _setSelected(uniqueKey);
-                      _initAnimationAndStart(_circleAlignX, 1);
+
+                      setPage(selected);
                     }))
                 .toList(),
           ),
         ),
         Positioned.fill(
-          top: -(CIRCLE_SIZE + CIRCLE_OUTLINE + SHADOW_ALLOWANCE) / 2,
+          top: widget.hidden
+              ? 0
+              : -(CIRCLE_SIZE + CIRCLE_OUTLINE + SHADOW_ALLOWANCE) / 2,
           child: Container(
             child: AnimatedAlign(
               duration: Duration(milliseconds: ANIM_DURATION),
               curve: Curves.easeOut,
               alignment: Alignment(_circleAlignX, 1),
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 15),
+                padding: const EdgeInsets.only(bottom: 14),
                 child: FractionallySizedBox(
                   widthFactor: 1 / widget.tabs.length,
                   child: GestureDetector(
@@ -172,11 +195,10 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                                       width: CIRCLE_SIZE + CIRCLE_OUTLINE,
                                       height: CIRCLE_SIZE + CIRCLE_OUTLINE,
                                       decoration: BoxDecoration(
-                                          color: Colors.white,
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                                color: Colors.black12,
+                                                color: shadowColor,
                                                 blurRadius: 8)
                                           ])),
                                 ),
@@ -189,11 +211,13 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                               painter: HalfPainter(barBackgroundColor),
                             )),
                         SizedBox(
-                          height: CIRCLE_SIZE,
-                          width: CIRCLE_SIZE,
+                          height: CIRCLE_SIZE - 5,
+                          width: CIRCLE_SIZE - 5,
                           child: Container(
                             decoration: BoxDecoration(
-                                shape: BoxShape.circle, color: circleColor),
+                                shape: BoxShape.circle,
+                                gradient: this.gradient,
+                                color: circleColor),
                             child: Padding(
                               padding: const EdgeInsets.all(0.0),
                               child: AnimatedOpacity(
@@ -220,8 +244,8 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
     );
   }
 
-  _initAnimationAndStart(double from, double to) {
-    _circleIconAlpha = 0;
+  _initAnimationAndStart(double initialAlphaValue) {
+    _circleIconAlpha = initialAlphaValue;
 
     Future.delayed(Duration(milliseconds: ANIM_DURATION ~/ 5), () {
       setState(() {
@@ -237,12 +261,40 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   }
 
   void setPage(int page) {
-    widget.onTabChangedListener(page);
-    _setSelected(widget.tabs[page].key);
-    _initAnimationAndStart(_circleAlignX, 1);
+    if (widget.pageController != null) {
+      widget.pageController.removeListener(_pageControllerListener);
+      var f = widget.pageController.animateToPage(page,
+          duration: Duration(milliseconds: ANIM_DURATION),
+          curve: Curves.easeOut);
+
+      f.then((v) {
+        // be shure that listener is added only one times
+        // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+        if (!widget.pageController.hasListeners) {
+          widget.pageController.addListener(_pageControllerListener);
+        }
+      });
+
+      _setSelected(widget.tabs[page].key);
+      _initAnimationAndStart(0);
+    } else {
+      widget.onTabChangedListener(page);
+
+      _setSelected(widget.tabs[page].key);
+      _initAnimationAndStart(0);
+
+      setState(() {
+        currentSelected = page;
+      });
+    }
+  }
+
+  void setPageOffset(double page) {
+    _setSelected(widget.tabs[page.round()].key);
+    _initAnimationAndStart(1);
 
     setState(() {
-      currentSelected = page;
+      currentSelected = page.round();
     });
   }
 }

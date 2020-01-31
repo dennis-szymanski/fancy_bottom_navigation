@@ -10,7 +10,6 @@ const double ARC_HEIGHT = 62;
 const double ARC_WIDTH = 90;
 const double CIRCLE_OUTLINE = 8;
 const double SHADOW_ALLOWANCE = 20;
-//const double BAR_HEIGHT = 60;
 
 class FancyBottomNavigation extends StatefulWidget {
   FancyBottomNavigation(
@@ -152,7 +151,7 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                     selected: t.key == widget.tabs[currentSelected].key,
                     iconData: t.iconData,
                     title: t.title,
-                    iconColor: inactiveIconColor,
+                    iconColor: widget.hidden ? Colors.white : inactiveIconColor,
                     gradient: this.gradient,
                     textColor: textColor,
                     callbackFunction: (uniqueKey) {

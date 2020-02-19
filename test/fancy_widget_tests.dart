@@ -1,4 +1,4 @@
-import 'package:sz_fancy_bottom_navigation/fancy_bottom_navigation.dart';
+import 'package:sz_fancy_bottom_navigation/sz_fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

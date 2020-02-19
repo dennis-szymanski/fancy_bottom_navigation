@@ -1,4 +1,5 @@
 # FancyBottomNavigation
+This package is based on fancy_bottom_navigation by tunitowen
 
 ![Fancy Gif](https://github.com/tunitowen/fancy_bottom_navigation/blob/master/fancy_gif.gif "Fancy Gif")
 
@@ -9,7 +10,7 @@ Add the plugin (pub coming soon):
 ```yaml
 dependencies:
   ...
-  fancy_bottom_navigation: ^0.3.2
+  sz_fancy_bottom_navigation: ^0.3.2
 ```
 
 ## Limitations
@@ -57,7 +58,6 @@ bottomNavigationBar: FancyBottomNavigation(
 The bar will attempt to use your current theme out of the box, however you may want to theme it. Here are the attributes:
 
 
-![Fancy Theming](https://github.com/tunitowen/fancy_bottom_navigation/blob/master/fancy_theming.png "Fancy Theming")
 
 ## Programmatic Selection
 

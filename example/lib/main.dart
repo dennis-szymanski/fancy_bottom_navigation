@@ -1,6 +1,7 @@
-import 'package:example/second_page.dart';
-import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
+import 'package:sz_fancy_bottom_navigation/sz_fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
+
+import 'second_page.dart';
 
 void main() => runApp(MyApp());
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/Users/appentwicklung/Documents/flutter/install/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/appentwicklung/Documents/flutter/fancy_bottom_navigation/example"
+export "FLUTTER_APPLICATION_PATH=/Users/appentwicklung/Documents/flutter/sz_fancy_bottom_navigation/example"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"
 export "SYMROOT=${SOURCE_ROOT}/../build/ios"

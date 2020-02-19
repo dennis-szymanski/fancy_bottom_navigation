@@ -15,7 +15,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  fancy_bottom_navigation:
+  sz_fancy_bottom_navigation:
     path: ../
 
   # The following adds the Cupertino Icons font to your application.

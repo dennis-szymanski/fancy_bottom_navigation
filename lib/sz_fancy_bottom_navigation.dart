@@ -13,8 +13,8 @@ const double SHADOW_ALLOWANCE = 20;
 
 class FancyBottomNavigation extends StatefulWidget {
   FancyBottomNavigation(
-      {@required this.tabs,
-      this.onTabChangedListener,
+      {required this.tabs,
+      required this.onTabChangedListener,
       this.key,
       this.initialSelection = 0,
       this.circleColor,
@@ -31,19 +31,19 @@ class FancyBottomNavigation extends StatefulWidget {
         assert(tabs.length > 1 && tabs.length < 6);
 
   final Function(int position) onTabChangedListener;
-  final Color circleColor;
-  final Color activeIconColor;
-  final Color inactiveIconColor;
-  final Color textColor;
-  final Gradient gradient;
-  final Color barBackgroundColor;
+  final Color? circleColor;
+  final Color? activeIconColor;
+  final Color? inactiveIconColor;
+  final Color? textColor;
+  final Color? barBackgroundColor;
+  final Gradient? gradient;
   final List<TabData> tabs;
   final int initialSelection;
-  final PageController pageController;
+  final PageController? pageController;
   final double barHeight;
   final bool hidden;
 
-  final Key key;
+  final Key? key;
 
   @override
   FancyBottomNavigationState createState() => FancyBottomNavigationState();
@@ -58,14 +58,14 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   double _circleAlignX = 0;
   double _circleIconAlpha = 1;
 
-  Color circleColor;
-  Color activeIconColor;
-  Color inactiveIconColor;
-  Color barBackgroundColor;
-  Color textColor;
-  Gradient gradient;
-  Color shadowColor;
-  Function() _pageControllerListener;
+  late Color circleColor;
+  late Color activeIconColor;
+  late Color inactiveIconColor;
+  late Color barBackgroundColor;
+  late Color textColor;
+  late Gradient gradient;
+  late Color shadowColor;
+  late Function() _pageControllerListener;
 
   @override
   void didChangeDependencies() {
@@ -73,37 +73,28 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
 
     activeIcon = widget.tabs[currentSelected].iconData;
 
-    circleColor = (widget.circleColor == null)
-        ? (Theme.of(context).brightness == Brightness.dark)
+    circleColor = widget.circleColor ??
+        ((Theme.of(context).brightness == Brightness.dark)
             ? Colors.white
-            : Theme.of(context).primaryColor
-        : widget.circleColor;
+            : Theme.of(context).primaryColor);
 
-    activeIconColor = (widget.activeIconColor == null)
-        ? (Theme.of(context).brightness == Brightness.dark)
+    activeIconColor = widget.activeIconColor ??
+        ((Theme.of(context).brightness == Brightness.dark)
             ? Colors.black54
-            : Colors.white
-        : widget.activeIconColor;
+            : Colors.white);
 
-    barBackgroundColor = (widget.barBackgroundColor == null)
-        ? (Theme.of(context).brightness == Brightness.dark)
+    barBackgroundColor = widget.barBackgroundColor ??
+        ((Theme.of(context).brightness == Brightness.dark)
             ? Color(0xFF212121)
-            : Colors.white
-        : widget.barBackgroundColor;
-    textColor = (widget.textColor == null)
-        ? (Theme.of(context).brightness == Brightness.dark)
+            : Colors.white);
+    textColor = widget.textColor ??
+        ((Theme.of(context).brightness == Brightness.dark)
             ? Colors.white
-            : Colors.black54
-        : widget.textColor;
-    inactiveIconColor = (widget.inactiveIconColor == null)
-        ? (Theme.of(context).brightness == Brightness.dark)
+            : Colors.black54);
+    inactiveIconColor = (widget.inactiveIconColor) ??
+        ((Theme.of(context).brightness == Brightness.dark)
             ? Colors.white
-            : Theme.of(context).primaryColor
-        : widget.inactiveIconColor;
-    gradient = widget.gradient;
-    shadowColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white54
-        : Colors.black12;
+            : Theme.of(context).primaryColor);
   }
 
   @override
@@ -114,8 +105,8 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
     // add listener for page swipes
     if (this.widget.pageController != null) {
       _pageControllerListener =
-          () => this.setPageOffset(this.widget.pageController.page);
-      this.widget.pageController.addListener(_pageControllerListener);
+          () => this.setPageOffset(this.widget.pageController!.page!);
+      this.widget.pageController!.addListener(_pageControllerListener);
     }
   }
 
@@ -177,7 +168,8 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                 child: FractionallySizedBox(
                   widthFactor: 1 / widget.tabs.length,
                   child: GestureDetector(
-                    onTap: widget.tabs[currentSelected].onclick,
+                    onTap: widget.tabs[currentSelected].onclick as void
+                        Function()?,
                     child: Stack(
                       alignment: Alignment.center,
                       children: <Widget>[
@@ -261,16 +253,16 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
 
   void setPage(int page) {
     if (widget.pageController != null) {
-      widget.pageController.removeListener(_pageControllerListener);
-      var f = widget.pageController.animateToPage(page,
+      widget.pageController!.removeListener(_pageControllerListener);
+      var f = widget.pageController!.animateToPage(page,
           duration: Duration(milliseconds: ANIM_DURATION),
           curve: Curves.easeOut);
 
       f.then((v) {
         // be shure that listener is added only one times
         // ignore: INVALID_USE_OF_PROTECTED_MEMBER
-        if (!widget.pageController.hasListeners) {
-          widget.pageController.addListener(_pageControllerListener);
+        if (!widget.pageController!.hasListeners) {
+          widget.pageController!.addListener(_pageControllerListener);
         }
       });
 
@@ -299,10 +291,10 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
 }
 
 class TabData {
-  TabData({@required this.iconData, @required this.title, this.onclick});
+  TabData({required this.iconData, required this.title, this.onclick});
 
   IconData iconData;
   String title;
-  Function onclick;
+  Function? onclick;
   final UniqueKey key = UniqueKey();
 }

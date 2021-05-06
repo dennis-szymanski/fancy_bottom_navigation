@@ -61,8 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
               iconData: Icons.home,
               title: "Home",
               onclick: () {
-                final FancyBottomNavigationState fState =
-                    bottomNavigationKey.currentState;
+                final FancyBottomNavigationState fState = bottomNavigationKey
+                    .currentState as FancyBottomNavigationState;
                 fState.setPage(2);
               }),
           TabData(
@@ -112,8 +112,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               color: Theme.of(context).accentColor,
               onPressed: () {
-                final FancyBottomNavigationState fState =
-                    bottomNavigationKey.currentState;
+                final FancyBottomNavigationState fState = bottomNavigationKey
+                    .currentState as FancyBottomNavigationState;
                 fState.setPage(2);
               },
             )

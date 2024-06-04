@@ -12,30 +12,31 @@ const double CIRCLE_OUTLINE = 8;
 const double SHADOW_ALLOWANCE = 20;
 
 class FancyBottomNavigation extends StatefulWidget {
-  FancyBottomNavigation(
-      {required this.tabs,
-      required this.onTabChangedListener,
-      this.key,
-      this.initialSelection = 0,
-      this.circleColor,
-      this.activeIconColor,
-      this.inactiveIconColor,
-      this.textColor,
-      this.gradient,
-      this.barBackgroundColor,
-      this.pageController,
-      this.barHeight = 60,
-      this.hidden = false})
-      : assert(onTabChangedListener != null || pageController != null),
-        assert(tabs != null),
+  FancyBottomNavigation({
+    required this.tabs,
+    this.onTabChangedListener,
+    this.pageController,
+    this.key,
+    this.initialSelection = 0,
+    this.circleColor,
+    this.activeIconColor,
+    this.inactiveIconColor,
+    this.textColor,
+    this.gradient,
+    this.barBackgroundColor,
+    this.shadowColor,
+    this.barHeight = 60,
+    this.hidden = false,
+  })  : assert(onTabChangedListener != null || pageController != null),
         assert(tabs.length > 1 && tabs.length < 6);
 
-  final Function(int position) onTabChangedListener;
+  final Function(int position)? onTabChangedListener;
   final Color? circleColor;
   final Color? activeIconColor;
   final Color? inactiveIconColor;
   final Color? textColor;
   final Color? barBackgroundColor;
+  final Color? shadowColor;
   final Gradient? gradient;
   final List<TabData> tabs;
   final int initialSelection;
@@ -63,16 +64,12 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   late Color inactiveIconColor;
   late Color barBackgroundColor;
   late Color textColor;
-  late Gradient gradient;
-  late Color shadowColor;
   late Function() _pageControllerListener;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     activeIcon = widget.tabs[currentSelected].iconData;
-
     circleColor = widget.circleColor ??
         ((Theme.of(context).brightness == Brightness.dark)
             ? Colors.white
@@ -125,32 +122,42 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
   @override
   Widget build(BuildContext context) {
     return Stack(
-      overflow: Overflow.visible,
+      clipBehavior: Clip.none,
       alignment: Alignment.bottomCenter,
       children: <Widget>[
         Container(
           height: widget.hidden ? 0 : widget.barHeight,
-          decoration: BoxDecoration(color: barBackgroundColor, boxShadow: [
-            BoxShadow(color: shadowColor, offset: Offset(0, -4), blurRadius: 4)
-          ]),
+          decoration: BoxDecoration(
+              color: barBackgroundColor,
+              boxShadow: widget.shadowColor != null
+                  ? [
+                      BoxShadow(
+                          color: widget.shadowColor!,
+                          offset: Offset(0, -4),
+                          blurRadius: 4)
+                    ]
+                  : null),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: widget.tabs
-                .map((t) => TabItem(
+                .map(
+                  (t) => TabItem(
                     uniqueKey: t.key,
                     selected: t.key == widget.tabs[currentSelected].key,
                     iconData: t.iconData,
                     title: t.title,
                     iconColor: widget.hidden ? Colors.white : inactiveIconColor,
-                    gradient: this.gradient,
+                    gradient: widget.gradient,
                     textColor: textColor,
                     callbackFunction: (uniqueKey) {
                       int selected = widget.tabs
                           .indexWhere((tabData) => tabData.key == uniqueKey);
 
                       setPage(selected);
-                    }))
+                    },
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -187,11 +194,14 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                                       height: CIRCLE_SIZE + CIRCLE_OUTLINE,
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                                color: shadowColor,
-                                                blurRadius: 8)
-                                          ])),
+                                          boxShadow: widget.shadowColor != null
+                                              ? [
+                                                  BoxShadow(
+                                                      color:
+                                                          widget.shadowColor!,
+                                                      blurRadius: 8)
+                                                ]
+                                              : null)),
                                 ),
                               )),
                         ),
@@ -207,7 +217,7 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
                           child: Container(
                             decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                gradient: this.gradient,
+                                gradient: widget.gradient,
                                 color: circleColor),
                             child: Padding(
                               padding: const EdgeInsets.all(0.0),
@@ -269,7 +279,7 @@ class FancyBottomNavigationState extends State<FancyBottomNavigation>
       _setSelected(widget.tabs[page].key);
       _initAnimationAndStart(0);
     } else {
-      widget.onTabChangedListener(page);
+      widget.onTabChangedListener!(page);
 
       _setSelected(widget.tabs[page].key);
       _initAnimationAndStart(0);
